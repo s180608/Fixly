@@ -5,6 +5,12 @@
 
 A UK home-services booking platform that brings service discovery, customer bookings, and everyday administration into one clean, responsive experience.
 
+### 🌐 Live Application
+
+**[Open Fixly →](https://fixly-frontend-2ivk.onrender.com)**
+
+> The application is deployed for portfolio demonstration. The backend may take a short time to respond after a period of inactivity.
+
 [![Fixly CI](https://github.com/s180608/Fixly/actions/workflows/ci.yml/badge.svg)](https://github.com/s180608/Fixly/actions/workflows/ci.yml)
 ![Java](https://img.shields.io/badge/Java-17-ED8B00)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1.1-6DB33F)
