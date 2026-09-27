@@ -1,0 +1,74 @@
+name: Fixly CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fixly-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: fixly-frontend
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: fixly-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check code
+        run: npm run lint
+
+      - name: Build frontend
+        run: npm run build
+
+  docker:
+    name: Backend tests and Docker checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v6
+
+      - name: Generate temporary test settings
+        run: sh scripts/setup-docker.sh
+
+      - name: Run backend tests
+        run: docker compose --profile test run --build --rm tests
+
+      - name: Build and start Fixly
+        run: docker compose up --build -d --wait --wait-timeout 180
+
+      - name: Check website and API
+        run: sh scripts/check-docker.sh
+
+      - name: Show logs if a check fails
+        if: failure()
+        run: docker compose --profile test logs --no-color --tail=100
+
+      - name: Clean up temporary containers
+        if: always()
+        run: docker compose --profile test down --volumes --remove-orphans
